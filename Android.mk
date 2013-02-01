@@ -68,14 +68,16 @@ CURL_HEADERS := \
 	multi.h \
 	stdcheaders.h \
 	typecheck-gcc.h
-
+LOCAL_ARM_MODE := arm
 LOCAL_SRC_FILES := $(addprefix lib/,$(CSOURCES))
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include/
 LOCAL_CFLAGS += $(common_CFLAGS)
 
+LOCAL_C_INCLUDES += $(ANDROID_BUILD_TOP)/external/openssl/include/
 LOCAL_COPY_HEADERS_TO := libcurl/curl
 LOCAL_COPY_HEADERS := $(addprefix include/curl/,$(CURL_HEADERS))
-
+LOCAL_SHARED_LIBRARIES +=libssl libcrypto
+LOCAL_SHARED_LIBRARIES += liblog libcutils
 LOCAL_MODULE:= libcurl
 LOCAL_MODULE_TAGS := optional
 
@@ -83,11 +85,12 @@ LOCAL_MODULE_TAGS := optional
 # Actually, this doesn't quite work because the build system searches
 # for NOTICE files before it gets to this point, so it will only be seen
 # on subsequent builds.
-ALL_PREBUILT += $(LOCAL_PATH)/NOTICE
+#ALL_PREBUILT += $(LOCAL_PATH)/NOTICE
 $(LOCAL_PATH)/NOTICE: $(LOCAL_PATH)/COPYING | $(ACP)
 	$(copy-file-to-target)
+LOCAL_PRELINK_MODULE := false
 
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 
 
 #########################
@@ -98,10 +101,10 @@ include $(LOCAL_PATH)/src/Makefile.inc
 LOCAL_SRC_FILES := $(addprefix src/,$(CURL_CFILES))
 
 LOCAL_MODULE := curl
-LOCAL_MODULE_TAGS := optional
-LOCAL_STATIC_LIBRARIES := libcurl
-LOCAL_SYSTEM_SHARED_LIBRARIES := libc
-
+LOCAL_MODULE_TAGS := tests
+#LOCAL_SHARED_LIBRARIES := libcurl
+LOCAL_SYSTEM_SHARED_LIBRARIES := libcurl libc 
+LOCAL_SHARED_LIBRARIES := liblog libcutils
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include $(LOCAL_PATH)/lib
 
 # This may also need to include $(CURLX_ONES) in order to correctly link

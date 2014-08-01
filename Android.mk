@@ -71,12 +71,14 @@ CURL_HEADERS := \
 LOCAL_ARM_MODE := arm
 LOCAL_SRC_FILES := $(addprefix lib/,$(CSOURCES))
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include/
-LOCAL_CFLAGS += $(common_CFLAGS)
+LOCAL_CFLAGS += $(common_CFLAGS) -DHAVE_ZLIB_H -DHAVE_ZLIB -DHAVE_LIBZ
 
-LOCAL_C_INCLUDES += $(ANDROID_BUILD_TOP)/external/openssl/include/
+LOCAL_C_INCLUDES += $(ANDROID_BUILD_TOP)/external/openssl/include/  \
+                                     $(ANDROID_BUILD_TOP)/external/zlib
+
 LOCAL_COPY_HEADERS_TO := libcurl/curl
 LOCAL_COPY_HEADERS := $(addprefix include/curl/,$(CURL_HEADERS))
-LOCAL_SHARED_LIBRARIES +=libssl libcrypto
+LOCAL_SHARED_LIBRARIES +=libssl libcrypto libz
 LOCAL_SHARED_LIBRARIES += liblog libcutils
 LOCAL_MODULE:= libcurl
 LOCAL_MODULE_TAGS := optional

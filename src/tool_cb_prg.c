@@ -68,6 +68,7 @@ int tool_progress_cb(void *clientp,
   /* simply count invokes */
   bar->calls++;
 
+#if 0
   if(total < 1) {
     curl_off_t prevblock = bar->prev / 1024;
     curl_off_t thisblock = point / 1024;
@@ -91,13 +92,14 @@ int tool_progress_cb(void *clientp,
   }
   fflush(bar->out);
   bar->prev = point;
-
+#endif
   return 0;
 }
 
 void progressbarinit(struct ProgressData *bar,
                      struct Configurable *config)
 {
+#if 0
 #ifdef __EMX__
   /* 20000318 mgs */
   int scr_size[2];
@@ -142,5 +144,6 @@ void progressbarinit(struct ProgressData *bar,
 #endif
 
   bar->out = config->errors;
+#endif
 }
 

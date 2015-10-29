@@ -111,6 +111,7 @@
 static void setup_des_key(const unsigned char *key_56,
                           DES_key_schedule DESKEYARG(ks))
 {
+  /*
   DES_cblock key;
 
   key[0] = key_56[0];
@@ -124,6 +125,7 @@ static void setup_des_key(const unsigned char *key_56,
 
   DES_set_odd_parity(&key);
   DES_set_key(&key, ks);
+  */
 }
 
 #else /* defined(USE_SSLEAY) */

@@ -40,6 +40,7 @@
 
 void warnf(struct Configurable *config, const char *fmt, ...)
 {
+  #if 0
   if(!config->mute) {
     va_list ap;
     int len;
@@ -76,6 +77,7 @@ void warnf(struct Configurable *config, const char *fmt, ...)
       }
     }
   }
+  #endif
 }
 
 /*
@@ -84,6 +86,7 @@ void warnf(struct Configurable *config, const char *fmt, ...)
 
 void helpf(FILE *errors, const char *fmt, ...)
 {
+  #if 0
   va_list ap;
   if(fmt) {
     va_start(ap, fmt);
@@ -96,5 +99,6 @@ void helpf(FILE *errors, const char *fmt, ...)
           "or 'curl --manual' "
 #endif
           "for more information\n");
+  #endif
 }
 

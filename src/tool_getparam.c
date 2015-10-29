@@ -291,6 +291,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
                                               has been used */
                             struct Configurable *config)
 {
+  #if 0
   char letter;
   char subletter = '\0'; /* subletters can only occur on long options */
   int rc;
@@ -1691,7 +1692,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
     hit = -1;
 
   } while(!longopt && !singleopt && *++parse && !*usedarg);
-
+#endif
   return PARAM_OK;
 }
 

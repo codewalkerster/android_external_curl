@@ -120,6 +120,7 @@ static int is_fatal_error(int code)
 
 int operate(struct Configurable *config, int argc, argv_item_t argv[])
 {
+#if 0
   char errorbuffer[CURL_ERROR_SIZE];
   struct ProgressData progressbar;
   struct getout *urlnode;
@@ -1775,5 +1776,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   main_free(); /* cleanup */
 
   return res;
+#endif
+  return 0;
 }
 

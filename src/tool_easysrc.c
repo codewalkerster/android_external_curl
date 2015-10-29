@@ -92,6 +92,7 @@ static void easysrc_free(void)
 /* Add a source line to the main code or remarks */
 CURLcode easysrc_add(struct curl_slist **plist, const char *line)
 {
+  #if 0
   CURLcode ret = CURLE_OK;
   struct curl_slist *list =
     curl_slist_append(*plist, line);
@@ -102,10 +103,14 @@ CURLcode easysrc_add(struct curl_slist **plist, const char *line)
   else
     *plist = list;
   return ret;
+  #endif
+  
+  return CURLE_OK;
 }
 
 CURLcode easysrc_addf(struct curl_slist **plist, const char *fmt, ...)
 {
+  #if 0
   CURLcode ret;
   char *bufp;
   va_list ap;
@@ -120,6 +125,8 @@ CURLcode easysrc_addf(struct curl_slist **plist, const char *fmt, ...)
     curl_free(bufp);
   }
   return ret;
+  #endif
+  return CURLE_OK;
 }
 
 #define CHKRET(v) do {CURLcode ret = (v); if(ret) return ret;} WHILE_FALSE
@@ -133,6 +140,7 @@ CURLcode easysrc_init(void)
 
 CURLcode easysrc_perform(void)
 {
+  #if 0
   /* Note any setopt calls which we could not convert */
   if(easysrc_toohard) {
     int i;
@@ -154,6 +162,7 @@ CURLcode easysrc_perform(void)
 
   CHKRET(easysrc_add(&easysrc_code, ""));
   CHKRET(easysrc_add(&easysrc_code, "ret = curl_easy_perform(hnd);"));
+  #endif
   return CURLE_OK;
 }
 
@@ -167,6 +176,7 @@ CURLcode easysrc_cleanup(void)
 
 void dumpeasysrc(struct Configurable *config)
 {
+  #if 0
   struct curl_slist *ptr;
   char *o = config->libcurl;
 
@@ -222,6 +232,7 @@ void dumpeasysrc(struct Configurable *config)
   }
 
   easysrc_free();
+  #endif
 }
 
 #endif /* CURL_DISABLE_LIBCURL_OPTION */

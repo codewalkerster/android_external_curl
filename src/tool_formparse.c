@@ -146,6 +146,7 @@ int formparse(struct Configurable *config,
               struct curl_httppost **last_post,
               bool literal_value)
 {
+  #if 0
   /* nextarg MUST be a string in the format 'name=contents' and we'll
      build a linked list with the info */
   char name[256];
@@ -356,6 +357,7 @@ int formparse(struct Configurable *config,
     return 1;
   }
   Curl_safefree(contents);
+  #endif
   return 0;
 }
 

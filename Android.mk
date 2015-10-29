@@ -69,11 +69,11 @@ CURL_HEADERS := \
 	stdcheaders.h \
 	typecheck-gcc.h
 LOCAL_ARM_MODE := arm
-LOCAL_SRC_FILES := $(addprefix lib/,$(CSOURCES))
+#LOCAL_SRC_FILES := $(addprefix lib/,$(CSOURCES))
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include/
 LOCAL_CFLAGS += $(common_CFLAGS) -DHAVE_ZLIB_H -DHAVE_ZLIB -DHAVE_LIBZ
 
-LOCAL_C_INCLUDES += $(ANDROID_BUILD_TOP)/external/openssl/include/  \
+LOCAL_C_INCLUDES += $(ANDROID_BUILD_TOP)/external/boringssl/src/include/openssl/  \
                                      $(ANDROID_BUILD_TOP)/external/zlib
 
 LOCAL_COPY_HEADERS_TO := libcurl/curl

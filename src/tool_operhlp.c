@@ -52,6 +52,7 @@ char *my_useragent(void)
  */
 void list_engines(const struct curl_slist *engines)
 {
+#if 0
   puts("Build-time engines:");
   if(!engines) {
     puts("  <none>");
@@ -59,6 +60,7 @@ void list_engines(const struct curl_slist *engines)
   }
   for(; engines; engines = engines->next)
     printf("  %s\n", engines->data);
+#endif
 }
 
 void clean_getout(struct Configurable *config)
@@ -79,10 +81,12 @@ void clean_getout(struct Configurable *config)
 
 bool output_expected(const char *url, const char *uploadfile)
 {
+#if 0
   if(!uploadfile)
     return TRUE;  /* download */
   if(checkprefix("http://", url) || checkprefix("https://", url))
     return TRUE;   /* HTTP(S) upload */
+#endif
 
   return FALSE; /* non-HTTP upload, probably no output should be expected */
 }
@@ -99,6 +103,7 @@ bool stdin_upload(const char *uploadfile)
  */
 char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
 {
+#if 0
   /* If no file name part is given in the URL, we add this file name */
   char *ptr = strstr(url, "://");
   if(ptr)
@@ -146,6 +151,7 @@ char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
       url = urlbuffer; /* use our new URL instead! */
     }
   }
+#endif
   return url;
 }
 

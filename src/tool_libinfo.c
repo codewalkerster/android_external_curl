@@ -46,6 +46,7 @@ long built_in_protos = 0;
 
 CURLcode get_libcurl_info(void)
 {
+  #if 0
   static struct proto_name_pattern {
     const char *proto_name;
     long        proto_pattern;
@@ -94,6 +95,7 @@ CURLcode get_libcurl_info(void)
       }
     }
   }
+  #endif
 
   return CURLE_OK;
 }

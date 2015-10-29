@@ -36,7 +36,7 @@
 #include <limits.h>
 #endif
 
-#include "urldata.h"
+//#include "urldata.h"
 #include "sendf.h"
 #include "formdata.h" /* for the boundary function */
 #include "url.h" /* for the ssl config check function */
@@ -93,7 +93,7 @@
 #if OPENSSL_VERSION_NUMBER >= 0x00907001L
 /* ENGINE_load_private_key() takes four arguments */
 #define HAVE_ENGINE_LOAD_FOUR_ARGS
-#include <openssl/ui.h>
+//#include <openssl/ui.h>
 #else
 /* ENGINE_load_private_key() takes three arguments */
 #undef HAVE_ENGINE_LOAD_FOUR_ARGS
@@ -1911,6 +1911,7 @@ static int X509V3_ext(struct SessionHandle *data,
     /* no extensions, bail out */
     return 1;
 
+#if 0
   for(i=0; i<sk_X509_EXTENSION_num(exts); i++) {
     ASN1_OBJECT *obj;
     X509_EXTENSION *ext = sk_X509_EXTENSION_value(exts, i);
@@ -1957,6 +1958,7 @@ static int X509V3_ext(struct SessionHandle *data,
     BIO_free(bio_out);
 
   }
+#endif
   return 0; /* all is fine */
 }
 
@@ -2685,9 +2687,10 @@ size_t Curl_ossl_version(char *buffer, size_t size)
                   (SSLEAY_VERSION_NUMBER>>12)&0xf);
 
 #else /* (SSLEAY_VERSION_NUMBER >= 0x900000) */
-  {
+  {/*
     char sub[2];
     sub[1]='\0';
+    
     if(SSLEAY_VERSION_NUMBER&0x0f) {
       sub[0]=(SSLEAY_VERSION_NUMBER&0x0f) + 'a' -1;
     }
@@ -2697,12 +2700,14 @@ size_t Curl_ossl_version(char *buffer, size_t size)
     return snprintf(buffer, size, "SSL/%x.%x.%x%s",
                     (SSLEAY_VERSION_NUMBER>>12)&0xff,
                     (SSLEAY_VERSION_NUMBER>>8)&0xf,
-                    (SSLEAY_VERSION_NUMBER>>4)&0xf, sub);
+                    (SSLEAY_VERSION_NUMBER>>4)&0xf, sub);*/
   }
 #endif /* (SSLEAY_VERSION_NUMBER >= 0x900000) */
 #endif /* SSLEAY_VERSION_NUMBER is less than 0.9.5 */
 
 #endif /* YASSL_VERSION */
+
+    return 0;
 }
 
 void Curl_ossl_random(struct SessionHandle *data, unsigned char *entropy,

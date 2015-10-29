@@ -76,6 +76,7 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
       return rc;
   }
 
+#if 0
   /*
    * This callback sets the filename where output shall be written when
    * curl options --remote-name (-O) and --remote-header-name (-J) have
@@ -125,7 +126,7 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
         return failure;
     }
   }
-
+#endif
   return cb;
 }
 

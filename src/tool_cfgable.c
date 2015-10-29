@@ -27,6 +27,7 @@
 
 void free_config_fields(struct Configurable *config)
 {
+#if 0
   struct getout *urlnode;
 
   if(config->easy) {
@@ -124,5 +125,6 @@ void free_config_fields(struct Configurable *config)
   Curl_safefree(config->ftp_alternative_to_user);
 
   Curl_safefree(config->libcurl);
+#endif
 }
 

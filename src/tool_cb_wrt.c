@@ -137,7 +137,7 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
 
   if(config->readbusy) {
     config->readbusy = FALSE;
-    curl_easy_pause(config->easy, CURLPAUSE_CONT);
+    //curl_easy_pause(config->easy, CURLPAUSE_CONT);
   }
 
   if(config->nobuffer) {

@@ -44,6 +44,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
                   unsigned char *data, size_t size,
                   void *userdata)
 {
+  #if 0
   struct Configurable *config = userdata;
   FILE *output = config->errors;
   const char *text;
@@ -64,8 +65,8 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
     }
     secs = epoch_offset + tv.tv_sec;
     now = localtime(&secs);  /* not thread safe but we don't care */
-    snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld ",
-             now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
+    //snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld ",
+    //         now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
   }
   else
     timebuf[0] = 0;
@@ -209,6 +210,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
   }
 
   dump(timebuf, text, output, data, size, config->tracetype, type);
+  #endif
   return 0;
 }
 

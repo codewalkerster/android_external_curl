@@ -58,7 +58,7 @@ static void show_dir_errno(FILE *errors, const char *name)
 #endif
 #ifdef ENAMETOOLONG
   case ENAMETOOLONG:
-    fprintf(errors, "The directory name %s is too long.\n", name);
+    //fprintf(errors, "The directory name %s is too long.\n", name);
     break;
 #endif
 #ifdef EROFS
@@ -93,6 +93,7 @@ static void show_dir_errno(FILE *errors, const char *name)
 
 CURLcode create_dir_hierarchy(const char *outfile, FILE *errors)
 {
+#if 0
   char *tempdir;
   char *tempdir2;
   char *outdup;
@@ -141,5 +142,7 @@ CURLcode create_dir_hierarchy(const char *outfile, FILE *errors)
   Curl_safefree(outdup);
 
   return result;
+#endif
+  return CURLE_OK;
 }
 

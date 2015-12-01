@@ -78,6 +78,10 @@
 #error "OPENSSL_VERSION_NUMBER not defined"
 #endif
 
+#if !defined(SSLEAY_VERSION_NUMBER)
+#define SSLEAY_VERSION_NUMBER OPENSSL_VERSION_NUMBER
+#endif
+
 #if OPENSSL_VERSION_NUMBER >= 0x0090581fL
 #define HAVE_SSL_GET1_SESSION 1
 #else
@@ -90,7 +94,7 @@
 #undef HAVE_USERDATA_IN_PWD_CALLBACK
 #endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x00907001L
+#if (OPENSSL_VERSION_NUMBER >= 0x00907001L && defined(HAVE_OPENSSL_UI_H))
 /* ENGINE_load_private_key() takes four arguments */
 #define HAVE_ENGINE_LOAD_FOUR_ARGS
 //#include <openssl/ui.h>
@@ -186,6 +190,248 @@ static bool rand_enough(int nread)
   /* this is a very silly decision to make */
   return (nread > 500) ? TRUE : FALSE;
 }
+#endif
+
+// compile through with boringssl
+// added by senbai.tao
+#ifdef BUILD_WITH_BORINGSSL
+
+#include <sys/un.h>
+#ifndef offsetof
+#  define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+#endif
+
+int RAND_query_egd_bytes(const char *path, unsigned char *buf, int bytes)
+	{
+	int ret = 0;
+	struct sockaddr_un addr;
+	int len, num, numbytes;
+	int fd = -1;
+	int success;
+	unsigned char egdbuf[2], tempbuf[255], *retrievebuf;
+
+	memset(&addr, 0, sizeof(addr));
+	addr.sun_family = AF_UNIX;
+	if (strlen(path) >= sizeof(addr.sun_path))
+		return (-1);
+	BUF_strlcpy(addr.sun_path,path,sizeof addr.sun_path);
+	len = offsetof(struct sockaddr_un, sun_path) + strlen(path);
+	fd = socket(AF_UNIX, SOCK_STREAM, 0);
+	if (fd == -1) return (-1);
+	success = 0;
+	while (!success)
+	    {
+	    if (connect(fd, (struct sockaddr *)&addr, len) == 0)
+	       success = 1;
+	    else
+		{
+		switch (errno)
+		    {
+#ifdef EINTR
+		    case EINTR:
+#endif
+#ifdef EAGAIN
+		    case EAGAIN:
+#endif
+#ifdef EINPROGRESS
+		    case EINPROGRESS:
+#endif
+#ifdef EALREADY
+		    case EALREADY:
+#endif
+			/* No error, try again */
+			break;
+#ifdef EISCONN
+		    case EISCONN:
+			success = 1;
+			break;
+#endif
+		    default:
+			goto err;	/* failure */
+		    }
+		}
+	    }
+
+	while (bytes > 0)
+	    {
+	    egdbuf[0] = 1;
+	    egdbuf[1] = bytes < 255 ? bytes : 255;
+	    numbytes = 0;
+	    while (numbytes != 2)
+		{
+	        num = write(fd, egdbuf + numbytes, 2 - numbytes);
+	        if (num >= 0)
+		    numbytes += num;
+	        else
+		    {
+		    switch (errno)
+		        {
+#ifdef EINTR
+		        case EINTR:
+#endif
+#ifdef EAGAIN
+		        case EAGAIN:
+#endif
+			    /* No error, try again */
+			    break;
+		        default:
+			    ret = -1;
+			    goto err;	/* failure */
+			}
+		    }
+		}
+	    numbytes = 0;
+	    while (numbytes != 1)
+		{
+	        num = read(fd, egdbuf, 1);
+	        if (num == 0)
+			goto err;	/* descriptor closed */
+		else if (num > 0)
+		    numbytes += num;
+	        else
+		    {
+		    switch (errno)
+		        {
+#ifdef EINTR
+		        case EINTR:
+#endif
+#ifdef EAGAIN
+		        case EAGAIN:
+#endif
+			    /* No error, try again */
+			    break;
+		        default:
+			    ret = -1;
+			    goto err;	/* failure */
+			}
+		    }
+		}
+	    if (egdbuf[0] == 0)
+		goto err;
+	    if (buf)
+		retrievebuf = buf + ret;
+	    else
+		retrievebuf = tempbuf;
+	    numbytes = 0;
+	    while (numbytes != egdbuf[0])
+		{
+	        num = read(fd, retrievebuf + numbytes, egdbuf[0] - numbytes);
+		if (num == 0)
+			goto err;	/* descriptor closed */
+	        else if (num > 0)
+		    numbytes += num;
+	        else
+		    {
+		    switch (errno)
+		        {
+#ifdef EINTR
+		        case EINTR:
+#endif
+#ifdef EAGAIN
+		        case EAGAIN:
+#endif
+			    /* No error, try again */
+			    break;
+		        default:
+			    ret = -1;
+			    goto err;	/* failure */
+			}
+		    }
+		}
+	    ret += egdbuf[0];
+	    bytes -= egdbuf[0];
+	    if (!buf)
+		RAND_seed(tempbuf, egdbuf[0]);
+	    }
+ err:
+	if (fd != -1) close(fd);
+	return(ret);
+	}
+
+
+int RAND_egd_bytes(const char *path, int bytes)
+	{
+	int num, ret = 0;
+
+	num = RAND_query_egd_bytes(path, NULL, bytes);
+	if (num < 1) goto err;
+	if (RAND_status() == 1)
+	    ret = num;
+ err:
+	return(ret);
+	}
+
+
+int RAND_egd(const char *path)
+	{
+	return (RAND_egd_bytes(path, 255));
+	}
+
+#define RFILE ".rnd"
+
+int OPENSSL_issetugid(void)
+	{
+	if (getuid() != geteuid()) return 1;
+	if (getgid() != getegid()) return 1;
+	return 0;
+	}
+
+const char *RAND_file_name(char *buf, size_t size)
+	{
+	char *s=NULL;
+#ifdef __OpenBSD__
+	struct stat sb;
+#endif
+
+	if (OPENSSL_issetugid() == 0)
+		s=getenv("RANDFILE");
+	if (s != NULL && *s && strlen(s) + 1 < size)
+		{
+		if (BUF_strlcpy(buf,s,size) >= size)
+			return NULL;
+		}
+	else
+		{
+		if (OPENSSL_issetugid() == 0)
+			s=getenv("HOME");
+#ifdef DEFAULT_HOME
+		if (s == NULL)
+			{
+			s = DEFAULT_HOME;
+			}
+#endif
+		if (s && *s && strlen(s)+strlen(RFILE)+2 < size)
+			{
+			BUF_strlcpy(buf,s,size);
+#ifndef OPENSSL_SYS_VMS
+			BUF_strlcat(buf,"/",size);
+#endif
+			BUF_strlcat(buf,RFILE,size);
+			}
+		else
+            buf[0] = '\0'; /* no file name */
+		}
+
+#ifdef __OpenBSD__
+	/* given that all random loads just fail if the file can't be
+	 * seen on a stat, we stat the file we're returning, if it
+	 * fails, use /dev/arandom instead. this allows the user to
+	 * use their own source for good random data, but defaults
+	 * to something hopefully decent if that isn't available.
+	 */
+
+	if (!buf[0])
+		if (BUF_strlcpy(buf,"/dev/arandom",size) >= size) {
+			return(NULL);
+		}
+	if (stat(buf,&sb) == -1)
+		if (BUF_strlcpy(buf,"/dev/arandom",size) >= size) {
+			return(NULL);
+		}
+
+#endif
+	return(buf);
+	}
 #endif
 
 static int ossl_seed(struct SessionHandle *data)
@@ -1241,7 +1487,7 @@ static CURLcode verifyhost(struct connectdata *conn,
 
 /* The SSL_CTRL_SET_MSG_CALLBACK doesn't exist in ancient OpenSSL versions
    and thus this cannot be done there. */
-#ifdef SSL_CTRL_SET_MSG_CALLBACK
+#if SSL_CTRL_SET_MSG_CALLBACK
 
 static const char *ssl_msg_type(int ssl_ver, int msg)
 {
@@ -1441,7 +1687,7 @@ ossl_connect_step1(struct connectdata *conn,
   SSL_CTX_set_mode(connssl->ctx, SSL_MODE_RELEASE_BUFFERS);
 #endif
 
-#ifdef SSL_CTRL_SET_MSG_CALLBACK
+#if SSL_CTRL_SET_MSG_CALLBACK
   if(data->set.fdebug && data->set.verbose) {
     /* the SSL trace callback is only used for verbose logging so we only
        inform about failures of setting it */

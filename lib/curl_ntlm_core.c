@@ -114,6 +114,16 @@ static void setup_des_key(const unsigned char *key_56,
   /*
   DES_cblock key;
 
+#ifdef BUILD_WITH_BORINGSSL
+  key.bytes[0] = key_56[0];
+  key.bytes[1] = (unsigned char)(((key_56[0] << 7) & 0xFF) | (key_56[1] >> 1));
+  key.bytes[2] = (unsigned char)(((key_56[1] << 6) & 0xFF) | (key_56[2] >> 2));
+  key.bytes[3] = (unsigned char)(((key_56[2] << 5) & 0xFF) | (key_56[3] >> 3));
+  key.bytes[4] = (unsigned char)(((key_56[3] << 4) & 0xFF) | (key_56[4] >> 4));
+  key.bytes[5] = (unsigned char)(((key_56[4] << 3) & 0xFF) | (key_56[5] >> 5));
+  key.bytes[6] = (unsigned char)(((key_56[5] << 2) & 0xFF) | (key_56[6] >> 6));
+  key.bytes[7] = (unsigned char) ((key_56[6] << 1) & 0xFF);
+#else
   key[0] = key_56[0];
   key[1] = (unsigned char)(((key_56[0] << 7) & 0xFF) | (key_56[1] >> 1));
   key[2] = (unsigned char)(((key_56[1] << 6) & 0xFF) | (key_56[2] >> 2));
@@ -122,6 +132,7 @@ static void setup_des_key(const unsigned char *key_56,
   key[5] = (unsigned char)(((key_56[4] << 3) & 0xFF) | (key_56[5] >> 5));
   key[6] = (unsigned char)(((key_56[5] << 2) & 0xFF) | (key_56[6] >> 6));
   key[7] = (unsigned char) ((key_56[6] << 1) & 0xFF);
+#endif
 
   DES_set_odd_parity(&key);
   DES_set_key(&key, ks);

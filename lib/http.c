@@ -2881,6 +2881,10 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
           infof(data, "no chunk, no close, no size. Assume close to "
                 "signal end\n");
           conn->bits.close = TRUE;
+          if (k->httpcode == 302) {
+            infof(data, "302 set opt_no_body , close now");
+            *stop_reading = TRUE;
+          }
         }
       }
 

@@ -79,15 +79,16 @@ CURL_HEADERS := \
 LOCAL_ARM_MODE := arm
 LOCAL_SRC_FILES := $(addprefix lib/,$(CSOURCES))
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include/
-LOCAL_CFLAGS += $(common_CFLAGS) -DHAVE_ZLIB_H -DHAVE_ZLIB -DHAVE_LIBZ -DBUILD_WITH_BORINGSSL
+LOCAL_CFLAGS += $(common_CFLAGS) -DHAVE_ZLIB_H -DHAVE_ZLIB -DHAVE_LIBZ -DBUILD_WITH_BORINGSSL -DUSE_ARES=1
 
 
 LOCAL_C_INCLUDES += $(ANDROID_BUILD_TOP)/SSL_RELATIVE_PATH \
-                    $(ANDROID_BUILD_TOP)/external/zlib
+                    $(ANDROID_BUILD_TOP)/external/zlib \
+                    $(LOCAL_PATH)/c-ares
 
 LOCAL_COPY_HEADERS_TO := libcurl/curl
 LOCAL_COPY_HEADERS := $(addprefix include/curl/,$(CURL_HEADERS))
-LOCAL_SHARED_LIBRARIES +=libssl libcrypto libz
+LOCAL_SHARED_LIBRARIES +=libssl libcrypto libz libcares
 LOCAL_SHARED_LIBRARIES += liblog libcutils
 LOCAL_MODULE:= libcurl
 LOCAL_MODULE_TAGS := optional
@@ -124,3 +125,6 @@ LOCAL_CFLAGS += $(common_CFLAGS)
 
 include $(BUILD_EXECUTABLE)
 
+##########################
+include $(CLEAR_VARS)
+include $(call all-makefiles-under,$(LOCAL_PATH))

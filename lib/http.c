@@ -3206,12 +3206,16 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         return CURLE_FILESIZE_EXCEEDED;
       }
       if(contentlength >= 0) {
-        k->size = contentlength;
-        k->maxdownload = k->size;
-        /* we set the progress download size already at this point
-           just to make it easier for apps/callbacks to extract this
-           info as soon as possible */
-        Curl_pgrsSetDownloadSize(data, k->size);
+        if (contentlength == 0) {
+          k->maxdownload = k->size = -1;
+        } else {
+          k->size = contentlength;
+          k->maxdownload = k->size;
+          /* we set the progress download size already at this point
+             just to make it easier for apps/callbacks to extract this
+             info as soon as possible */
+          Curl_pgrsSetDownloadSize(data, k->size);
+        }
       }
       else {
         /* Negative Content-Length is really odd, and we know it

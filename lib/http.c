@@ -3206,7 +3206,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         return CURLE_FILESIZE_EXCEEDED;
       }
       if(contentlength >= 0) {
-        if (contentlength == 0) {
+        if ((k->httpcode == 200 || k->httpcode == 206) && contentlength == 0) {
           k->maxdownload = k->size = -1;
         } else {
           k->size = contentlength;

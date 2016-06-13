@@ -274,6 +274,15 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         Curl_httpchunk_init(conn);
         datap++;
         length--;
+        /*trim first \r or \n */
+        if (*datap == 0xd || *datap == 0xa) {
+            datap++;
+            length++;
+        }
+        if (*datap == 0xd || *datap == 0xa) {
+            datap++;
+            length++;
+        }
       }
       else
         return CHUNKE_BAD_CHUNK;
